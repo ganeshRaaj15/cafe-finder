@@ -18,7 +18,7 @@
       z-index: 1;
     }
 
-    /* Sidebar (default: desktop view) */
+    /* Sidebar (desktop default) */
     .sidebar {
       position: absolute;
       top: 20px;
@@ -35,11 +35,11 @@
       z-index: 1000;
     }
 
-    /* Mobile: bottom sheet hidden initially */
+    /* Mobile: bottom sheet */
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
-        bottom: -100%;
+        bottom: 0;
         left: 0;
         right: 0;
         top: auto;
@@ -47,11 +47,14 @@
         max-height: 60vh;
         border-radius: 20px 20px 0 0;
         margin: 0;
-        transition: bottom 0.3s ease;
+        padding: 20px;
+        box-sizing: border-box;
+        transform: translateY(100%); /* Hidden */
+        transition: transform 0.4s ease-in-out;
       }
 
       .sidebar.active {
-        bottom: 0;
+        transform: translateY(0); /* Slide up */
       }
     }
 
@@ -61,8 +64,12 @@
       padding: 10px 14px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin: 5px 0;
-      width: 100%;
+      margin: 8px 0;
+      width: calc(100% - 20px);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
     }
 
     .results {
@@ -84,23 +91,46 @@
     .toggle-btn {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      left: 20px;
       z-index: 1001;
       background: rgba(0,0,0,0.7);
       color: #fff;
       border: none;
-      padding: 12px 16px;
-      border-radius: 50%;
-      font-size: 20px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
       cursor: pointer;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
       display: none;
+      transition: all 0.3s ease;
     }
 
     @media (max-width: 768px) {
       .toggle-btn {
         display: block;
       }
+
+      .sidebar.active + .toggle-btn {
+        display: none;
+      }
+
+      .sidebar.active .close-btn {
+        display: block;
+      }
+    }
+
+    /* Close button inside sidebar */
+    .close-btn {
+      display: none;
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: inherit;
     }
 
     /* Dark mode */
@@ -123,9 +153,10 @@
   <div id="map"></div>
 
   <!-- Toggle button (mobile only) -->
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <button class="toggle-btn" id="menuBtn" onclick="openSidebar()">Menu</button>
 
   <div class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">✕</button>
     <h2>Cafe Finder</h2>
     <input type="text" id="searchInput" placeholder="Enter area (e.g. Kuala Lumpur)" />
     <button onclick="searchArea()">Search Area</button>
@@ -146,11 +177,15 @@
 
     const sidebar = document.getElementById("sidebar");
     const resultsDiv = document.getElementById("results");
+
     let markersLayer = L.layerGroup().addTo(map);
 
-    // Toggle sidebar (only applies on mobile)
-    function toggleSidebar() {
-      sidebar.classList.toggle("active");
+    // Sidebar controls
+    function openSidebar() {
+      sidebar.classList.add("active");
+    }
+    function closeSidebar() {
+      sidebar.classList.remove("active");
     }
 
     // Toggle dark mode
